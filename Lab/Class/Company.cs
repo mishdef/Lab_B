@@ -36,6 +36,7 @@ namespace Lab.Class
                 throw new Exception("Only CEO can create project board");
             }
         }
+
         public void AddEmployee(IUserInfo sessionUser, IUserInfo newEmployee)
         {
             if (sessionUser is CEO)
