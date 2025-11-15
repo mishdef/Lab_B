@@ -4,85 +4,85 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Lab.Interface;
+using MyFunctions;
 
 namespace Lab.Class
 {
     public class Company
     {
         public string Name { get; set; }
-        public List<IUserInfo> Employees { get; set; } = new List<IUserInfo>();
+        public List<User> Employees { get; set; } = new List<User>();
         public List<ProjectBoard> ProjectBoards { get; } = new List<ProjectBoard>();
 
-        public Company(IUserInfo CEO)
+        public Company(User CEO)
         {
             Name = "Company";
             AddEmployee(CEO, CEO);
         }
 
-        public Company(IUserInfo CEO, string name) : this(CEO)
+        public Company(User CEO, string name) : this(CEO)
         {
             Name = name;
         }
 
-        public void CreateProjectBoard(IUserInfo sessionUser, string name)
+        public void CreateProjectBoard(User sessionUser, string name)
         {
-            if (sessionUser is CEO)
+            if (PermissionService.CanInteractWithCompany(sessionUser))
             {
                 ProjectBoards.Add(new ProjectBoard(name));
             }
-
             else
             {
-                throw new Exception("Only CEO can create project board");
+                throw new WarningException("Only CEO can create project board");
             }
         }
 
-        public void AddEmployee(IUserInfo sessionUser, IUserInfo newEmployee)
+        public void AddEmployee(User sessionUser, User newEmployee)
         {
-            if (sessionUser is CEO)
+            if (PermissionService.CanInteractWithCompany(sessionUser))
             {
                 Employees.Add(newEmployee);
             }
             else
             {
-                throw new Exception("Only CEO can add employee");
+                throw new WarningException("Only CEO can add employee");
             }
         }
-        public void ChangeName(IUserInfo sessionUser, string name)
+        public void ChangeName(User sessionUser, string name)
         {
-            if (sessionUser is CEO)
+            if (PermissionService.CanInteractWithCompany(sessionUser))
             {
                 Name = name;
             }
             else
             {
-                throw new Exception("Only CEO can change name");
+                throw new WarningException("Only CEO can change name");
             }
         }
-        public void RemoveEmployee(IUserInfo sessionUser, IUserInfo employee)
+        public void RemoveEmployee(User sessionUser, User employee)
         {
             if (sessionUser == employee)
             {
-                throw new Exception("You can't remove yourself");
+                throw new WarningException("You can't remove yourself");
             }
-            if (sessionUser is CEO)
+            if (PermissionService.CanInteractWithCompany(sessionUser))
             {
                 Employees.Remove(employee);
             }
             else
             {
-                throw new Exception("Only CEO can remove employee");
+                throw new WarningException("Only CEO can remove employee");
             }
         }
-        public void RemoveProjectBoard(IUserInfo sessionUser, ProjectBoard projectBoard)
+        public void RemoveProjectBoard(User sessionUser, ProjectBoard projectBoard)
         {
-            if (sessionUser is CEO)
+            if (PermissionService.CanInteractWithCompany(sessionUser))
             {
                 ProjectBoards.Remove(projectBoard);
             }
             else
             {
-                throw new Exception("Only CEO can remove project board");
+                throw new WarningException("Only CEO can remove project board");
             }
         }
     }

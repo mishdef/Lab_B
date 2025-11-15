@@ -10,17 +10,17 @@ namespace Lab.Class
 {
     public static class PermissionService
     {
-        static public bool CanInteractWithCompany(IUserInfo userInfo)
+        static public bool CanInteractWithCompany(User userInfo)
         {
             return userInfo is CEO;
         }
 
-        static public bool CanInteractWithProjectBoard(IUserInfo userInfo)
+        static public bool CanInteractWithProjectBoard(User userInfo)
         {
             return userInfo is CEO || userInfo is ProjectManager;
         }
 
-        static public bool CanInteractWithTask(IUserInfo userInfo)
+        static public bool CanInteractWithTask(User userInfo)
         {
             return userInfo is CEO || userInfo is ProjectManager || userInfo is Employee;
         }

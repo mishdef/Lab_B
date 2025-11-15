@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Lab.Interface;
 using Lab.Enum;
 using System.Collections;
+using MyFunctions;
 
 namespace Lab.Class
 {
@@ -23,7 +24,7 @@ namespace Lab.Class
             Name = name;
         }
 
-        public Task AddTask(IUserInfo sessionUser, string taskName)
+        public Task AddTask(User sessionUser, string taskName)
         {
             if (PermissionService.CanInteractWithProjectBoard(sessionUser))
             {
@@ -32,11 +33,11 @@ namespace Lab.Class
             }
             else
             {
-                throw new Exception("Only CEO and ProjectManager can add task");
+                throw new WarningException("Only CEO and ProjectManager can add task");
             }
         }
 
-        public void RemoveTask(IUserInfo assignee, Task task)
+        public void RemoveTask(User assignee, Task task)
         {
             if (PermissionService.CanInteractWithProjectBoard(assignee))
             {
@@ -44,11 +45,11 @@ namespace Lab.Class
             }
             else
             {
-                throw new Exception("Only CEO and ProjectManager can remove task");
+                throw new WarningException("Only CEO and ProjectManager can remove task");
             }
         }
 
-        public void ChangeName(IUserInfo sessionUser, string name)
+        public void ChangeName(User sessionUser, string name)
         {
             if (PermissionService.CanInteractWithProjectBoard(sessionUser))
             {
@@ -56,7 +57,7 @@ namespace Lab.Class
             }
             else
             {
-                throw new Exception("Only CEO and ProjectManager can change name");
+                throw new WarningException("Only CEO and ProjectManager can change name");
             }
         }
 

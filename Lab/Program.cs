@@ -20,7 +20,7 @@ namespace Lab
 
             Menu.SelectedItemColor = ConsoleColor.DarkCyan;
 
-            IUserInfo user = new CEO(CEOName);
+            User user = new CEO(CEOName);
             Company company = new Company(user, name);
 
             CompanyProjectsAppSession companyProjectsApp = new CompanyProjectsAppSession(company, user);

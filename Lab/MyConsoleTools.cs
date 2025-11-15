@@ -8,6 +8,33 @@ using System.Threading.Tasks;
 
 namespace MyFunctions
 {
+    public class ErrorException : Exception
+    {
+        public ErrorException() : base() { }
+
+        public ErrorException(string message) : base(message) { }
+
+        public ErrorException(string message, Exception innerException) : base(message, innerException) { }
+    }
+
+    public class WarningException : Exception
+    {
+        public WarningException() : base() { }
+
+        public WarningException(string message) : base(message) { }
+
+        public WarningException(string message, Exception innerException) : base(message, innerException) { }
+    }
+
+    public class InfoException : Exception
+    {
+        public InfoException() : base() { }
+
+        public InfoException(string message) : base(message) { }
+
+        public InfoException(string message, Exception innerException) : base(message, innerException) { }
+    }
+
 
     public static class MessageBox
     {
@@ -110,6 +137,11 @@ namespace MyFunctions
 
         public static void BoxItem(string item)
         {
+            if (string.IsNullOrEmpty(item))
+            {
+                return;
+            }
+
             Console.Write("┏");
             for (int i = 0; i < item.Length + 2; i++) { Console.Write('━'); }
             Console.Write("┓\n");

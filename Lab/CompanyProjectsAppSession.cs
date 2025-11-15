@@ -8,9 +8,9 @@ namespace Lab.Class
     public class CompanyProjectsAppSession
     {
         public Company company;
-        public IUserInfo userSessionUser;
+        public User userSessionUser;
 
-        public CompanyProjectsAppSession(Company company, IUserInfo userSessionUser)
+        public CompanyProjectsAppSession(Company company, User userSessionUser)
         {
             this.company = company;
             this.userSessionUser = userSessionUser;
@@ -79,16 +79,40 @@ namespace Lab.Class
                             Tools.DrawLine(50);
                             break;
                         case 9:
-                            exit = true;
+                            if (MessageBox.Show("Are you sure you want to exit?", "Question", MessageBox.Buttons.YesNo) == MessageBox.Button.Yes)
+                            {
+                                exit = true;
+                            }
                             break;
                         case -1:
-                            exit = true;
+                            if (MessageBox.Show("Are you sure you want to exit?", "Question", MessageBox.Buttons.YesNo) == MessageBox.Button.Yes)
+                            {
+                                exit = true;
+                            }
                             break;
                     }
                 }
-                catch (Exception ex)
+                catch (InfoException ex)
                 {
                     Console.ForegroundColor = ConsoleColor.Blue;
+                    MessageBox.BoxItem(ex.Message);
+                    Console.ResetColor();
+                }
+                catch (WarningException ex)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    MessageBox.BoxItem(ex.Message);
+                    Console.ResetColor();
+                }
+                catch (ErrorException ex)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    MessageBox.BoxItem(ex.Message);
+                    Console.ResetColor();
+                }
+                catch (Exception ex)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     MessageBox.BoxItem(ex.Message);
                     Console.ResetColor();
                 }
@@ -102,10 +126,10 @@ namespace Lab.Class
             {
                 try
                 {
-                    Console.WriteLine($"Project: {projectBoard.Name}");
-                    switch (Menu.DisplayMenu("     Project Board Menu     ", new string[]
+                    switch (Menu.DisplayMenu($"Project Board:      {projectBoard.Name} ", new string[]
                     {
                     "View Tasks",
+                    $"View Tasks assigned to me  |  {userSessionUser.GetInfo()}",
                     "Add Task",
                     "Clone Task",
                     "Remove Task",
@@ -116,29 +140,51 @@ namespace Lab.Class
                             ViewTasks(projectBoard);
                             break;
                         case 2:
+                            ViewTasks(projectBoard, userSessionUser);
+                            break;
+                        case 3:
                             Tools.DrawLine(50);
                             AddTask(projectBoard);
                             Tools.DrawLine(50);
                             break;
-                        case 3:
+                        case 4:
                             Tools.DrawLine(50);
                             CloneTask(projectBoard);
                             Tools.DrawLine(50);
                             break;
-                        case 4:
+                        case 5:
                             Tools.DrawLine(50);
                             RemoveTask(projectBoard);
                             Tools.DrawLine(50);
                             break;
-                        case 5:
+                        case 6:
                             exit = true;
                             break;
                         case -1:
                             exit = true;
                             break;
                     }
-                }catch (Exception ex) { 
+                }
+                catch (InfoException ex)
+                {
                     Console.ForegroundColor = ConsoleColor.Blue;
+                    MessageBox.BoxItem(ex.Message);
+                    Console.ResetColor();
+                }
+                catch(WarningException ex)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    MessageBox.BoxItem(ex.Message);
+                    Console.ResetColor();
+                }
+                catch (ErrorException ex)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    MessageBox.BoxItem(ex.Message);
+                    Console.ResetColor();
+                }
+                catch (Exception ex) {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     MessageBox.BoxItem(ex.Message);
                     Console.ResetColor();
                 }
@@ -147,11 +193,17 @@ namespace Lab.Class
 
         public void OpenProjectBoard()
         {
-            ViewProjectBoards();
+            if (company.ProjectBoards.Count == 0) throw new InfoException("No project boards");
 
-            int i = InputInt("Project board number: ", InputType.With, 1, company.ProjectBoards.Count);
-            ProjectBoard? projectBoard = company.ProjectBoards[i - 1];
-            if (projectBoard == null) throw new Exception("Project board not found");
+            List<string> menuItems = new List<string>();
+            foreach (ProjectBoard projectBoar in company.ProjectBoards)
+            {
+                menuItems.Add(projectBoar.GetInfo());
+            }
+
+            int choose = Menu.DisplayMenu("     Open Project Board     ", menuItems.ToArray(), false, true);
+
+            ProjectBoard projectBoard = company.ProjectBoards[choose - 1];
 
             BoardInteractionMenu(projectBoard);
         }
@@ -197,20 +249,54 @@ namespace Lab.Class
                             break;
                     }
                 }
-                catch (Exception ex)
+                catch (InfoException ex)
                 {
                     Console.ForegroundColor = ConsoleColor.Blue;
+                    MessageBox.BoxItem(ex.Message);
+                    Console.ResetColor();
+                }
+                catch (WarningException ex)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    MessageBox.BoxItem(ex.Message);
+                    Console.ResetColor();
+                }
+                catch (ErrorException ex)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    MessageBox.BoxItem(ex.Message);
+                    Console.ResetColor();
+                }
+                catch (Exception ex)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     MessageBox.BoxItem(ex.Message);
                     Console.ResetColor();
                 }
             } while (!exit);
         }
 
-        public void ViewTasks(ProjectBoard projectBoard, bool interact = true)
+        public void ViewTasks(ProjectBoard projectBoard, User user)
         {
-            if (projectBoard.Tasks.Count == 0) throw new Exception("No tasks found");
+            if (projectBoard.Tasks.Count == 0) throw new InfoException("No tasks found");
+
+            List<List<Task>> columns = GetTaskColumns(projectBoard, user);
+            if (columns[0].Count == 0 && columns[1].Count == 0 && columns[2].Count == 0 && columns[3].Count == 0) throw new InfoException("No tasks found assigned to you");
+
+            DisplayTaskColumns(columns);
+
+            Task task = SelectTask(columns, "Select task to view: ");
+
+            InteractWithTask(projectBoard, task);
+        }
+
+        public void ViewTasks(ProjectBoard projectBoard)
+        {
+            if (projectBoard.Tasks.Count == 0) throw new InfoException("No tasks found");
 
             List<List<Task>> columns = GetTaskColumns(projectBoard);
+
+            DisplayTaskColumns(columns);
 
             Task task = SelectTask(columns, "Select task to view: ");
 
@@ -230,10 +316,14 @@ namespace Lab.Class
             string name = InputString("Task name: ");
             Task task = projectBoard.AddTask(userSessionUser, name);
 
-            if (MessageBox.Show("Do you want assign task to Employee", "Question", MessageBox.Buttons.YesNo) == MessageBox.Button.Yes)
+            if (MessageBox.Show("Do you want assign task to employee?", "Question", MessageBox.Buttons.YesNo) == MessageBox.Button.Yes)
             {
                 AssignTask(projectBoard, task);
             }
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+            MessageBox.BoxItem($"Task: \"{name}\" added successfully");
+            Console.ResetColor();
         }
 
         public List<List<Task>> GetTaskColumns(ProjectBoard projectBoard) 
@@ -246,6 +336,16 @@ namespace Lab.Class
             return columns;
         }
 
+        public List<List<Task>> GetTaskColumns(ProjectBoard projectBoard, User user) 
+        {
+            List<List<Task>> columns = new List<List<Task>>();
+            columns.Add(projectBoard.Tasks.FindAll(x => x.CurrentStatus == TaskStat.ToDo && x.Assignee == user));
+            columns.Add(projectBoard.Tasks.FindAll(x => x.CurrentStatus == TaskStat.InProgress && x.Assignee == user));
+            columns.Add(projectBoard.Tasks.FindAll(x => x.CurrentStatus == TaskStat.InReview && x.Assignee == user));
+            columns.Add(projectBoard.Tasks.FindAll(x => x.CurrentStatus == TaskStat.Done && x.Assignee == user));
+            return columns;
+        }
+
         public void DisplayTaskColumns(List<List<Task>> columns)
         {
             List<Task> ToDoTasks = columns[0];
@@ -255,8 +355,20 @@ namespace Lab.Class
 
             int maxRows = Math.Max(ToDoTasks.Count, Math.Max(InProgressTasks.Count, Math.Max(InReviewTasks.Count, DoneTasks.Count)));
             DrawLine(104);
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write("        ToDo             ");
+            Console.ResetColor();
+            Console.Write("|");
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("        ToDo             |     In Progress         |      In Review          |        Done             ");
+            Console.Write("     In Progress         ");
+            Console.ResetColor();
+            Console.Write("|");
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.Write("      In Review          ");
+            Console.ResetColor();
+            Console.Write("|");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("        Done             \n");
             Console.ResetColor();
             DrawLine(104);
 
@@ -371,41 +483,55 @@ namespace Lab.Class
                     column = DoneTasks;
                     break;
                 case 5:
-                    throw new Exception("Exit");
+                    throw new Exception("");
                 case -1:
-                    throw new Exception("Exit");
+                    throw new Exception("");
             }
 
-            if (column.Count == 0) throw new Exception("No tasks found");
-            int j = InputInt(prompt, InputType.With, 1, column.Count);
+            if (column.Count == 0) throw new WarningException("No tasks found");
+
+            List<string> menuItems = new List<string>();
+            foreach (Task tas in column)
+            {
+                menuItems.Add(tas.GetInfo());
+            }
+
+            int j = Menu.DisplayMenu("Select task", menuItems.ToArray(), false, true, false);
+
             Task? task = column[j - 1];
-            if (task == null) throw new Exception("Task not found");
+            if (task == null) throw new WarningException("Task not found");
 
             return task;
         }
 
         public void CloneTask(ProjectBoard projectBoard, bool interact = true)
         {
-            if (projectBoard.Tasks.Count == 0) throw new Exception("No tasks found");
+            if (projectBoard.Tasks.Count == 0) throw new InfoException("No tasks found");
 
             List<List<Task>> columns = GetTaskColumns(projectBoard);
+
+            DisplayTaskColumns(columns);
 
             Task task = SelectTask(columns, "Select task to clone: ");
 
             projectBoard.Tasks.Add((Task)task.Clone());
-            MessageBox.BoxItem("Task cloned successfully");
+
+            throw new InfoException("Task cloned successfully");
         }
 
         public void RemoveTask(ProjectBoard projectBoard, bool interact = true)
         {
-            if (projectBoard.Tasks.Count == 0) throw new Exception("No tasks found");
+            if (projectBoard.Tasks.Count == 0) throw new InfoException("No tasks found");
 
             List<List<Task>> columns = GetTaskColumns(projectBoard);
+
+            DisplayTaskColumns(columns);
 
             Task task = SelectTask(columns, "Select task to remove: ");
 
             projectBoard.RemoveTask(userSessionUser, task);
-            MessageBox.BoxItem("Task removed");
+
+            throw new InfoException("Task removed");
         }
 
         public void ViewTask(Task task)
@@ -415,11 +541,17 @@ namespace Lab.Class
 
         public void AssignTask(ProjectBoard projectBoard, Task task)
         {
-            ViewEmployees();
+            List<string> menuItems = new List<string>();
 
-            int i = InputInt("Employee number: ", InputType.With, 1, company.Employees.Count);
-            IUserInfo? employee = company.Employees[i - 1];
-            if (employee == null) throw new Exception("Employee not found");
+            foreach (User employe in company.Employees)
+            {
+                menuItems.Add(employe.GetInfo());
+            }
+
+            int i = Menu.DisplayMenu("Select employee: ", menuItems.ToArray(), false, true, false);
+
+            User? employee = company.Employees[i - 1];
+            if (employee == null) throw new WarningException("Employee not found");
 
             task.AssignEmployee(userSessionUser, employee);
         }
@@ -438,7 +570,7 @@ namespace Lab.Class
 
         public void ViewProjectBoards()
         {
-            if (company.ProjectBoards.Count == 0) throw new Exception("No project boards");
+            if (company.ProjectBoards.Count == 0) throw new InfoException("No project boards");
             Console.WriteLine("Project boards: ");
             int i = 1;
             foreach (ProjectBoard projectBoard in company.ProjectBoards)
@@ -452,26 +584,37 @@ namespace Lab.Class
         {
             string name = InputString("Project board name: ");
             company.CreateProjectBoard(userSessionUser, name);
-            Console.WriteLine("Project board created");
+            throw new InfoException("Project board created");
         }
 
         public void RemoveProjectBoard()
         {
-            ViewProjectBoards();
+            List<string> menuItems = new List<string>();
 
-            int i = InputInt("Project board number: ", InputType.With, 1, company.ProjectBoards.Count);
+            foreach (ProjectBoard projectBoar in company.ProjectBoards)
+            {
+                menuItems.Add(projectBoar.GetInfo());
+            }
+
+            int i = Menu.DisplayMenu("Select project board: ", menuItems.ToArray(), false, true, false);
+
             ProjectBoard? projectBoard = company.ProjectBoards[i - 1];
-            if (projectBoard == null) throw new Exception("Project board not found");
+            if (projectBoard == null) throw new WarningException("Project board not found");
             company.RemoveProjectBoard(userSessionUser, projectBoard);
-            Console.WriteLine("Project board removed");
+            throw new InfoException("Project board removed");
         }
 
+        // INTERFACE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         public void ViewEmployees()
         {
-            if (company.Employees.Count == 0) throw new Exception("No employees");
+            if (company.Employees.Count == 0) throw new InfoException("No employees");
+
             Console.WriteLine("Employees: ");
-            for (int i = 0; i < company.Employees.Count; i++) { 
-                Console.WriteLine( (i + 1) + ". " + company.Employees[i].GetInfo().ToString());
+            int i = 1;
+            foreach (User employee in company.Employees) 
+            {
+                Console.WriteLine(i + ". " + employee.GetInfo());
+                i++;
             }
         }
 
@@ -497,14 +640,17 @@ namespace Lab.Class
 
         public void RemoveEmployee()
         {
-            for (int i = 0; i < company.Employees.Count; i++)
+            List<string> menuItems = new List<string>();
+
+            foreach (User employe in company.Employees)
             {
-                Console.WriteLine($"{i + 1}. {company.Employees[i].Name}");
+                menuItems.Add(employe.GetInfo());
             }
 
-            int j = InputInt("Employee number: ", InputType.With, 1, company.Employees.Count);
-            IUserInfo? employee = company.Employees[j - 1];
-            if (employee == null) throw new Exception("Employee not found");
+            int j = Menu.DisplayMenu("Select employee: ", menuItems.ToArray(), false, true, false);
+
+            User? employee = company.Employees[j - 1];
+            if (employee == null) throw new WarningException("Employee not found");
             company.RemoveEmployee(userSessionUser, employee);
 
             Console.WriteLine("Employee removed");
@@ -512,11 +658,17 @@ namespace Lab.Class
 
         public void ChangeUser()
         {
-            ViewEmployees();
+            List<string> menuItems = new List<string>();
 
-            int i = InputInt("Employee number: ", InputType.With, 1, company.Employees.Count);
-            IUserInfo? user = company.Employees[i - 1];
-            if (user == null) throw new Exception("User not found");
+            foreach (User employe in company.Employees)
+            {
+                menuItems.Add(employe.GetInfo());
+            }
+
+            int i = Menu.DisplayMenu("Select user: ", menuItems.ToArray(), false, true, false);
+
+            User? user = company.Employees[i - 1];
+            if (user == null) throw new WarningException("User not found");
             userSessionUser = user;
         }
     }
