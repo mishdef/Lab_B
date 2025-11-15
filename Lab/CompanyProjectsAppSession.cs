@@ -613,7 +613,8 @@ namespace Lab.Class
             int i = 1;
             foreach (User employee in company.Employees) 
             {
-                Console.WriteLine(i + ". " + employee.GetInfo());
+                IUserInfo userInfo = employee as IUserInfo;
+                Console.WriteLine(i + ". " + userInfo.GetInfo());
                 i++;
             }
         }

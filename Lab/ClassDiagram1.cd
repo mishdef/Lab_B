@@ -9,6 +9,11 @@
   </Class>
   <Class Name="Lab.Class.Company">
     <Position X="13.5" Y="3.5" Width="5.25" />
+    <AssociationLine Name="ProjectBoards" Type="Lab.Class.ProjectBoard">
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="-0.13" Y="0.695" Height="0.182" Width="2.458" />
+      </MemberNameLabel>
+    </AssociationLine>
     <TypeIdentifier>
       <HashCode>AAAAAEAAAAAIAAAAAACQAAQACAAAAAAAAAAAAFAAAAA=</HashCode>
       <FileName>Class\Company.cs</FileName>
@@ -53,7 +58,7 @@
   <Class Name="Lab.Class.Task">
     <Position X="22" Y="9" Width="4.25" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAEAAABAASAIQAAAAAAEAAAAAAAEAAAAA=</HashCode>
+      <HashCode>AAAAIAAAAAAAEAAABAASAIQAAAAAAEAAAAAAAEAAABA=</HashCode>
       <FileName>Class\Task.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
@@ -80,7 +85,7 @@
   <Interface Name="Lab.Interface.IUserInfo">
     <Position X="21.5" Y="6.5" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAACAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAACAAAAAAAAAAAAQAAAAAAEAAAAAAAAAAAAA=</HashCode>
       <FileName>Interface\IUserInfo.cs</FileName>
     </TypeIdentifier>
   </Interface>
